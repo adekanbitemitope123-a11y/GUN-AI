@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080808">
+  <title>GUN AI — Chat</title>
+  <style>
+    :root{color-scheme:dark;--bg:#080808;--panel:#111;--panel2:#171717;--line:#2b2b2b;--text:#f5f5f5;--muted:#999;--white:#fff}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+    button,textarea{font:inherit}button{cursor:pointer}.layout{min-height:100vh;display:grid;grid-template-columns:240px 1fr}
+    aside{border-right:1px solid var(--line);padding:22px 15px;display:flex;flex-direction:column;gap:24px;background:#0d0d0d}
+    .brand{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:750;letter-spacing:-.5px;padding:0 6px}.mark{display:grid;place-items:center;background:#fff;color:#000;border-radius:9px;width:34px;height:34px;font-size:11px;font-weight:900}
+    .new{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:11px;text-align:left}
+    .hint{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#777;font-weight:750;padding:0 8px}.history{color:#aaa;font-size:12px;padding:9px 8px}
+    .sidebottom{margin-top:auto;color:#777;font-size:11px;padding:8px}
+    main{min-width:0;display:flex;flex-direction:column;min-height:100vh}.top{height:65px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 26px;color:#ddd;font-size:13px}
+    .status{font-size:11px;color:#aaa}.center{width:min(780px,100%);padding:28px 22px 20px;margin:0 auto;display:flex;flex:1;flex-direction:column}
+    .welcome{margin:auto 0 32px;text-align:center}.eyebrow{text-transform:uppercase;letter-spacing:2.5px;font-size:10px;color:#888;margin-bottom:18px}
+    h1{font-size:clamp(34px,5vw,52px);line-height:1.08;letter-spacing:-2px;margin:0 0 14px}.sub{color:#999;font-size:13px;margin:0}
+    .messages{display:flex;flex-direction:column;gap:20px;padding:10px 0 28px}.message{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.8}.message.user{align-self:flex-end;max-width:90%;background:#202020;border:1px solid #303030;border-radius:14px 14px 4px 14px;padding:11px 14px}.message.assistant{padding:4px 0;max-width:100%}.assistant-label{font-size:10px;color:#888;letter-spacing:1.3px;margin-bottom:5px}
+    .composer{margin-top:auto;border:1px solid #353535;border-radius:17px;padding:14px;background:#121212}.composer:focus-within{border-color:#777}textarea{width:100%;min-height:52px;max-height:180px;resize:vertical;background:transparent;color:var(--text);border:0;outline:0;padding:4px;font-size:14px}textarea::placeholder{color:#777}
+    .bottom{display:flex;justify-content:space-between;align-items:center;gap:10px}.small{font-size:10px;color:#777}.send{background:#fff;color:#000;border:0;border-radius:9px;padding:8px 14px;font-size:12px;font-weight:750}.send:disabled{opacity:.4;cursor:not-allowed}
+    .suggestions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:13px 0 18px}.suggestion{background:transparent;color:#ddd;border:1px solid #292929;border-radius:11px;padding:12px;text-align:left;font-size:12px}.suggestion:hover{background:#151515;border-color:#555}.foot{text-align:center;color:#666;font-size:10px;padding:14px 0 0}
+    .error{color:#ffb4b4}.hidden{display:none!important}
+    @media(max-width:650px){.layout{grid-template-columns:1fr}aside{display:none}.top{height:58px;padding:0 16px}.center{padding:20px 14px}.suggestions{grid-template-columns:1fr}h1{letter-spacing:-1.5px}.welcome{margin-top:10vh}}
+  </style>
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div class="brand"><span class="mark">GUN</span><span>GUN <span style="color:#888;font-weight:450">AI</span></span></div>
+    <button class="new" id="newChat">＋ &nbsp; New chat</button>
+    <div><div class="hint">Workspace</div><div class="history">Your conversations will appear here.</div></div>
+    <div class="sidebottom">GUN AI · OpenAI-powered starter</div>
+  </aside>
+  <main>
+    <header class="top"><strong>GUN AI</strong><span class="status" id="status">Checking AI connection…</span></header>
+    <section class="center">
+      <div class="welcome" id="welcome"><div class="eyebrow">A clearer way to think</div><h1>What can we figure out?</h1><p class="sub">Ideas, questions, code, and everything in between.</p></div>
+      <div class="messages hidden" id="messages" aria-live="polite"></div>
+      <div class="suggestions" id="suggestions">
+        <button class="suggestion" data-prompt="Help me turn a project idea into a practical step-by-step plan.">Explore an idea →</button>
+        <button class="suggestion" data-prompt="Explain a difficult topic in simple terms with an example.">Learn something →</button>
+        <button class="suggestion" data-prompt="Help me write clean, responsive HTML, CSS, and JavaScript.">Build with code →</button>
+        <button class="suggestion" data-prompt="Help me organize my goals into a realistic weekly plan.">Make a plan →</button>
+      </div>
+      <form class="composer" id="form"><textarea id="prompt" rows="2" placeholder="Message GUN AI…" aria-label="Message GUN AI"></textarea><div class="bottom"><span class="small">AI can make mistakes. Verify important information.</span><button class="send" id="send" disabled>Send ↑</button></div></form>
+      <div class="foot">Private API key stays on your server. Usage may incur OpenAI charges.</div>
+    </section>
+  </main>
+</div>
+<script>
+(() => {
+  const form=document.querySelector("#form"), prompt=document.querySelector("#prompt"), send=document.querySelector("#send");
+  const messagesEl=document.querySelector("#messages"), welcome=document.querySelector("#welcome"), suggestions=document.querySelector("#suggestions"), statusEl=document.querySelector("#status");
+  const history=[];
+  prompt.addEventListener("input",()=>{send.disabled=!prompt.value.trim();prompt.style.height="auto";prompt.style.height=Math.min(prompt.scrollHeight,180)+"px";});
+  prompt.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();if(prompt.value.trim())form.requestSubmit();}});
+  function addMessage(role,text){const node=document.createElement("div");node.className="message "+role;if(role==="assistant"){const label=document.createElement("div");label.className="assistant-label";label.textContent="GUN AI";node.append(label);}const body=document.createElement("div");body.textContent=text;node.append(body);messagesEl.append(node);return body;}
+  async function sendMessage(text){const value=(text||prompt.value).trim();if(!value)return;welcome.classList.add("hidden");suggestions.classList.add("hidden");messagesEl.classList.remove("hidden");addMessage("user",value);history.push({role:"user",content:value});prompt.value="";prompt.style.height="auto";send.disabled=true;send.textContent="…";statusEl.textContent="Thinking…";const reply=addMessage("assistant","");reply.textContent="";try{const response=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:history.slice(-20)})});const data=await response.json();if(!response.ok)throw new Error(data.error||"Request failed.");reply.textContent=data.reply;history.push({role:"assistant",content:data.reply});statusEl.textContent="OpenAI connected";}catch(error){reply.textContent=error.message+" You can retry by sending your message again.";reply.classList.add("error");history.pop();statusEl.textContent="Connection needs attention";}finally{send.disabled=!prompt.value.trim();send.textContent="Send ↑";prompt.focus();}}
+  form.addEventListener("submit",e=>{e.preventDefault();sendMessage();});
+  document.querySelectorAll("[data-prompt]").forEach(button=>button.addEventListener("click",()=>sendMessage(button.dataset.prompt)));
+  document.querySelector("#newChat").addEventListener("click",()=>{history.length=0;messagesEl.replaceChildren();messagesEl.classList.add("hidden");welcome.classList.remove("hidden");suggestions.classList.remove("hidden");prompt.value="";send.disabled=true;statusEl.textContent="New chat";prompt.focus();});
+  fetch("/api/health").then(r=>r.json()).then(data=>{statusEl.textContent=data.aiConfigured?"OpenAI ready · "+data.model:"Add OpenAI API key";}).catch(()=>{statusEl.textContent="Server connection unavailable";});
+})();
+</script>
+</body>
+</html>
